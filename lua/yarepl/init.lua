@@ -755,8 +755,7 @@ M.commands.hide_or_focus = function(opts)
     local repl = M._get_repl(id, name, current_buffer)
 
     if not repl then
-        vim.notify [[REPL doesn't exist!]]
-        return
+        return false
     end
 
     local bufnr = repl.bufnr
@@ -769,6 +768,7 @@ M.commands.hide_or_focus = function(opts)
     else
         focus_repl(repl)
     end
+    return true
 end
 
 M.commands.close = function(opts)
@@ -1099,7 +1099,12 @@ Hide REPL `i` or the REPL that current buffer is attached to.
 ]],
 })
 
-api.nvim_create_user_command('REPLHideOrFocus', M.commands.hide_or_focus, {
+api.nvim_create_user_command('REPLHideOrFocus', function()
+    local repl_exists = M.commands.hide_or_focus()
+    if not repl_exists or repl_exists == false then
+        vim.notify [[REPL doesn't exist!]]
+    end
+end, {
     count = true,
     nargs = '?',
     desc = [[
